@@ -3,7 +3,9 @@ package com.example.admin.helloworld1;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -14,6 +16,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -21,24 +25,29 @@ import okhttp3.Response;
 
 public class Main2Activity extends AppCompatActivity {
     private TextView textView;
-    private Button button1;
-    private String[] data={"北京","上海","天津"};
+    private  ListView listView;
+    private List<String> data2=new ArrayList();
+    private int[] pids=new int[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,};
+    private String[] data={"北京","上海","天津","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""};
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
+        this.textView =(TextView) findViewById(R.id.textView);
+        this.listView =(ListView) findViewById(R.id.list_view);
         ArrayAdapter<String> adapter =new ArrayAdapter<String>(
                 Main2Activity.this,android.R.layout.simple_list_item_1,data);
-        ListView listView =(ListView) findViewById(R.id.list_view);
-        listView.setAdapter(adapter);
-        this.textView =(TextView) findViewById(R.id.textView);
-        this.button1 =(Button)findViewById(R.id.button1);
-        this.button1.setOnClickListener(new View.OnClickListener() {
+      listView.setAdapter(adapter);
+        this.listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onClick(View v) {
-                startActivity(new Intent(Main2Activity.this,MainActivity.class));
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Log.v("点击了哪一个",""+position+":"+Main2Activity.this.pids[position]+":"+Main2Activity.this.data[position]);
+                Intent intent = new Intent(Main2Activity.this,MainActivity.class);
+                intent.putExtra("pid",Main2Activity.this.pids[position]);
+                startActivity(intent);
             }
         });
+
         String weatherUrl = "http://guolin.tech/api/china";
         HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
 
@@ -49,9 +58,9 @@ public class Main2Activity extends AppCompatActivity {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-            final String responseText = response.body().string();
-            String[]  result=parseJSONObject(responseText);
-                Main2Activity.this.data=result;
+             final String responseText = response.body().string();
+                parseJSONObject(responseText);
+
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() { textView.setText(responseText);
@@ -60,27 +69,20 @@ public class Main2Activity extends AppCompatActivity {
             }
         });
     }
-    private String[] parseJSONObject(String responseText){
+    private void parseJSONObject(String responseText) {
         JSONArray jsonArray = null;
         try {
             jsonArray = new JSONArray(responseText);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jsonObject = null;
+                jsonObject = jsonArray.getJSONObject(i);
+                this.data[i] = jsonObject.getString("name");
+                this.pids[i] = jsonObject.getInt("id");
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        String[] result=new String[jsonArray.length()];
-        for (int i=0;i<jsonArray.length();i++){
-            JSONObject jsonObject = null;
-            try {
-                jsonObject = jsonArray.getJSONObject(i);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            try {
-                result[i]=jsonObject.getString("name");
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-        return result;
     }
 }
+
+

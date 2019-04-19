@@ -3,6 +3,7 @@ package com.example.admin.helloworld1;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -22,6 +23,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Intent intent=getIntent();
+        int pid=intent.getIntExtra("pid",0);
+        Log.v("我们接收id",""+pid);
         this.textView = (TextView) findViewById(R.id.abc);
         this.button =(Button)findViewById(R.id.button);
         this.button.setOnClickListener(new View.OnClickListener() {
