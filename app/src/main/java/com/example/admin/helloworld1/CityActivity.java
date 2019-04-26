@@ -16,39 +16,47 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
-public class Main2Activity extends AppCompatActivity {
+public class CityActivity extends AppCompatActivity {
+    private int[] cids=new int[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,};
+    private String[] data={"","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""};
     private TextView textView;
-    private  ListView listView;
-    private List<String> data2=new ArrayList();
-    private int[] pids=new int[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,};
-    private String[] data={"北京","上海","天津","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""};
+    private Button button;
+    private ListView listView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main2);
-        this.textView =(TextView) findViewById(R.id.textView);
+        setContentView(R.layout.activity_main);
+        Intent intent=getIntent();
+        final int pid=intent.getIntExtra("pid",0);
+        Log.v("我们接收id",""+pid);
+        this.textView = (TextView) findViewById(R.id.abc);
+        this.button =(Button)findViewById(R.id.button);
+        this.button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(CityActivity.this,ProvinceActivity.class));
+            }
+        });
         this.listView =(ListView) findViewById(R.id.list_view);
-        ArrayAdapter<String> adapter =new ArrayAdapter<String>(
-                Main2Activity.this,android.R.layout.simple_list_item_1,data);
-      listView.setAdapter(adapter);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,data);
+
+        listView.setAdapter(adapter);
         this.listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.v("点击了哪一个",""+position+":"+Main2Activity.this.pids[position]+":"+Main2Activity.this.data[position]);
-                Intent intent = new Intent(Main2Activity.this,MainActivity.class);
-                intent.putExtra("pid",Main2Activity.this.pids[position]);
+                Log.v("点击了哪一个",""+position+":"+cids[position]+":"+data[position]);
+                Intent intent = new Intent(CityActivity.this,CountyActivity.class);
+                intent.putExtra("cid",cids[position]);
+                intent.putExtra("pid",pid);
                 startActivity(intent);
             }
         });
-
-        String weatherUrl = "http://guolin.tech/api/china";
+        String weatherUrl = "http://guolin.tech/api/china/"+pid+"/";
         HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
 
             @Override
@@ -58,14 +66,15 @@ public class Main2Activity extends AppCompatActivity {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-             final String responseText = response.body().string();
+                final String responseText = response.body().string();
                 parseJSONObject(responseText);
 
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() { textView.setText(responseText);
-                }
-            });
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        textView.setText(responseText);
+                    }
+                });
             }
         });
     }
@@ -77,12 +86,10 @@ public class Main2Activity extends AppCompatActivity {
                 JSONObject jsonObject = null;
                 jsonObject = jsonArray.getJSONObject(i);
                 this.data[i] = jsonObject.getString("name");
-                this.pids[i] = jsonObject.getInt("id");
+                this.cids[i] = jsonObject.getInt("id");
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 }
-
-
