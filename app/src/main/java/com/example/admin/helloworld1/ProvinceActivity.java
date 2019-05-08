@@ -23,16 +23,22 @@ import okhttp3.Callback;
 import okhttp3.Response;
 
 public class ProvinceActivity extends AppCompatActivity {
-    private TextView textView;
+
     private  ListView listView;
     private List<String> data2=new ArrayList();
+    private int[] cids=new int[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,};
     private int[] pids=new int[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,};
-    private String[] data={"北京","上海","天津","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""};
+    private List<String>  data=new ArrayList<>();
+    private  String currentlevel="province";
+    private  int pid=0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
-        this.textView =(TextView) findViewById(R.id.textView);
+        if(currentlevel == "city"){
+
+        }
+
         this.listView =(ListView) findViewById(R.id.list_view);
         final ArrayAdapter<String> adapter =new ArrayAdapter<String>(
                 ProvinceActivity.this,android.R.layout.simple_list_item_1,data);
@@ -40,14 +46,26 @@ public class ProvinceActivity extends AppCompatActivity {
         this.listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.v("点击了哪一个",""+position+":"+ProvinceActivity.this.pids[position]+":"+ProvinceActivity.this.data[position]);
-                Intent intent = new Intent(ProvinceActivity.this,CityActivity.class);
-                intent.putExtra("pid",ProvinceActivity.this.pids[position]);
-                startActivity(intent);
+                Log.v("点击了哪一个",""+position+":"+ProvinceActivity.this.pids[position]+":"+ProvinceActivity.this.data.get(position));
+               // Intent intent = new Intent(ProvinceActivity.this,CityActivity.class);
+                //intent.putExtra("pid",ProvinceActivity.this.pids[position]);
+                pid=ProvinceActivity.this.pids[position];
+                currentlevel="city";
+                one(adapter);
+               // if(currentlevel == "city"){
+                  //  intent.putExtra("cid",cids[position]);
+              //  }
+                //startActivity(intent);
             }
         });
+        one(adapter);
+    }
 
-        String weatherUrl = "http://guolin.tech/api/china";
+
+
+    private void one(final ArrayAdapter<String> adapter)  {
+        String weatherUrl=currentlevel=="city"?"http://guolin.tech/api/china/"+pid:"http://guolin.tech/api/china";
+        //String weatherUrl = "http://guolin.tech/api/china";
         HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
 
             @Override
@@ -62,21 +80,28 @@ public class ProvinceActivity extends AppCompatActivity {
 
             runOnUiThread(new Runnable() {
                 @Override
-                public void run() { textView.setText(responseText);
+                public void run() { //textView.setText(responseText);
+                    adapter.notifyDataSetChanged();
                 }
             });
             }
         });
     }
+
     private void parseJSONObject(String responseText) {
         JSONArray jsonArray = null;
+        this.data.clear();
         try {
             jsonArray = new JSONArray(responseText);
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject jsonObject = null;
                 jsonObject = jsonArray.getJSONObject(i);
-                this.data[i] = jsonObject.getString("name");
-                this.pids[i] = jsonObject.getInt("id");
+                this.data.add(jsonObject.getString("name"));
+                if (currentlevel == "city") {
+                    this.cids[i] = jsonObject.getInt("id");
+                } else {
+                    this.pids[i] = jsonObject.getInt("id");
+                }
             }
         } catch (JSONException e) {
             e.printStackTrace();
