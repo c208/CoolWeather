@@ -25,9 +25,7 @@ import okhttp3.Response;
 public class ProvinceActivity extends AppCompatActivity {
 
     private  ListView listView;
-    private List<String> data2=new ArrayList();
-    private int[] cids=new int[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,};
-    private int[] pids=new int[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,};
+    private List<String> data2=new ArrayList(); private List<Integer>pids = new ArrayList<>();
     private List<String>  data=new ArrayList<>();
     private  String currentlevel="province";
     private  int pid=0;
@@ -35,9 +33,6 @@ public class ProvinceActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
-        if(currentlevel == "city"){
-
-        }
 
         this.listView =(ListView) findViewById(R.id.list_view);
         final ArrayAdapter<String> adapter =new ArrayAdapter<String>(
@@ -46,10 +41,10 @@ public class ProvinceActivity extends AppCompatActivity {
         this.listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.v("点击了哪一个",""+position+":"+ProvinceActivity.this.pids[position]+":"+ProvinceActivity.this.data.get(position));
+                Log.v("点击了哪一个",""+position+":"+ProvinceActivity.this.pids.get(position)+":"+ProvinceActivity.this.data.get(position));
                // Intent intent = new Intent(ProvinceActivity.this,CityActivity.class);
                 //intent.putExtra("pid",ProvinceActivity.this.pids[position]);
-                pid=ProvinceActivity.this.pids[position];
+                pid=ProvinceActivity.this.pids.get(position);
                 currentlevel="city";
                 one(adapter);
                // if(currentlevel == "city"){
@@ -91,17 +86,17 @@ public class ProvinceActivity extends AppCompatActivity {
     private void parseJSONObject(String responseText) {
         JSONArray jsonArray = null;
         this.data.clear();
+        this.pids.clear();
         try {
             jsonArray = new JSONArray(responseText);
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject jsonObject = null;
                 jsonObject = jsonArray.getJSONObject(i);
                 this.data.add(jsonObject.getString("name"));
-                if (currentlevel == "city") {
-                    this.cids[i] = jsonObject.getInt("id");
-                } else {
-                    this.pids[i] = jsonObject.getInt("id");
-                }
+                this.pids.add(jsonObject.getInt("id"));
+
+
+
             }
         } catch (JSONException e) {
             e.printStackTrace();
