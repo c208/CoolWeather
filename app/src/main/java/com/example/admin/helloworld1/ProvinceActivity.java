@@ -24,11 +24,17 @@ import okhttp3.Response;
 
 public class ProvinceActivity extends AppCompatActivity {
 
-    private  ListView listView;
-    private List<String> data2=new ArrayList(); private List<Integer>pids = new ArrayList<>();
+    public static final String PROVINCE = "province";
+    public static final String CITY = "city";
+    public static final String COUNTY = "county";
+    private  String currentlevel =PROVINCE;
+    private List<Integer>pids = new ArrayList<>();
     private List<String>  data=new ArrayList<>();
-    private  String currentlevel="province";
-    private  int pid=0;
+    private List<String> weather_ids=new ArrayList<>();
+    private  int weatherId=0;
+    private  int provinceId=0;
+    private  int cityId=0;
+    private  ListView listView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,8 +50,20 @@ public class ProvinceActivity extends AppCompatActivity {
                 Log.v("点击了哪一个",""+position+":"+ProvinceActivity.this.pids.get(position)+":"+ProvinceActivity.this.data.get(position));
                // Intent intent = new Intent(ProvinceActivity.this,CityActivity.class);
                 //intent.putExtra("pid",ProvinceActivity.this.pids[position]);
-                pid=ProvinceActivity.this.pids.get(position);
-                currentlevel="city";
+                provinceId=ProvinceActivity.this.pids.get(position);
+                if(currentlevel== PROVINCE) {
+                    currentlevel = CITY;
+                    provinceId=ProvinceActivity.this.pids.get(position);
+                }else  if(currentlevel ==CITY){
+                    currentlevel = COUNTY;
+                 cityId=ProvinceActivity.this.pids.get(position);
+                }else if( currentlevel == COUNTY){
+                    weatherId=ProvinceActivity.this.pids.get(position);
+                    Intent intent = new Intent(ProvinceActivity.this,WeatherActivity.class);
+                    intent.putExtra("wid",weather_ids.get(position));
+                    startActivity(intent);
+                }
+
                 one(adapter);
                // if(currentlevel == "city"){
                   //  intent.putExtra("cid",cids[position]);
@@ -59,7 +77,7 @@ public class ProvinceActivity extends AppCompatActivity {
 
 
     private void one(final ArrayAdapter<String> adapter)  {
-        String weatherUrl=currentlevel=="city"?"http://guolin.tech/api/china/"+pid:"http://guolin.tech/api/china";
+        String weatherUrl=currentlevel== PROVINCE ? "http://guolin.tech/api/china/":(currentlevel==CITY?"http://guolin.tech/api/china/"+provinceId :"http://guolin.tech/api/china/"+provinceId+"/"+cityId);
         //String weatherUrl = "http://guolin.tech/api/china";
         HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
 
@@ -87,6 +105,7 @@ public class ProvinceActivity extends AppCompatActivity {
         JSONArray jsonArray = null;
         this.data.clear();
         this.pids.clear();
+        this.weather_ids.clear();
         try {
             jsonArray = new JSONArray(responseText);
             for (int i = 0; i < jsonArray.length(); i++) {
@@ -94,6 +113,9 @@ public class ProvinceActivity extends AppCompatActivity {
                 jsonObject = jsonArray.getJSONObject(i);
                 this.data.add(jsonObject.getString("name"));
                 this.pids.add(jsonObject.getInt("id"));
+                if(jsonObject.has("weather_id")){
+                    this.weather_ids.add(jsonObject.getString("weather_id"));
+                }
 
 
 
